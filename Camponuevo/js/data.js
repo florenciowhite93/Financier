@@ -9229,6 +9229,11 @@ function getSubCategories() {
     initSubCategories();
     subCategoriesCache = JSON.parse(localStorage.getItem('camponuevo_subcategories') || '[]');
     
+    // Ensure it's always an array
+    if (!Array.isArray(subCategoriesCache)) {
+        subCategoriesCache = [];
+    }
+    
     if (!subCategoriesSupabaseLoaded) {
         loadSubCategoriesFromSupabaseInBackground();
     }
@@ -9338,7 +9343,8 @@ async function getCategories() {
     if (isSupabaseAvailable()) {
         try {
             const supabaseCats = await getCategoriesFromSupabase();
-            if (supabaseCats && supabaseCats.length > 0) {
+            // Ensure we always return an array
+            if (supabaseCats && Array.isArray(supabaseCats) && supabaseCats.length > 0) {
                 categoriesCache = supabaseCats;
                 console.log('Categories loaded from Supabase:', categoriesCache.length);
                 return categoriesCache;
@@ -9354,6 +9360,10 @@ async function getCategories() {
     if (data) {
         try {
             categoriesCache = JSON.parse(data);
+            // Ensure it's an array
+            if (!Array.isArray(categoriesCache)) {
+                categoriesCache = [];
+            }
             console.log('Categories loaded from localStorage:', categoriesCache.length);
             return categoriesCache;
         } catch (e) {
@@ -9674,6 +9684,11 @@ function getLaboratories() {
     initLaboratories();
     laboratoriesCache = JSON.parse(localStorage.getItem('camponuevo_laboratories') || '[]');
     
+    // Ensure it's always an array
+    if (!Array.isArray(laboratoriesCache)) {
+        laboratoriesCache = [];
+    }
+    
     if (!laboratoriesSupabaseLoaded) {
         loadLaboratoriesFromSupabaseInBackground();
     }
@@ -9757,6 +9772,11 @@ function getLabels() {
     
     initLabels();
     let labels = JSON.parse(localStorage.getItem('camponuevo_labels') || '[]');
+    
+    // Ensure it's always an array
+    if (!Array.isArray(labels)) {
+        labels = [];
+    }
     
     let migrated = false;
     labels = labels.map(l => {
