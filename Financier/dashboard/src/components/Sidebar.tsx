@@ -18,7 +18,8 @@ import {
   DollarSign,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  User
 } from "lucide-react";
 import { useState } from "react";
 
@@ -36,6 +37,7 @@ const navigation = [
   { name: "Inmuebles", href: "/inmuebles", icon: Home },
   { name: "Presupuesto", href: "/presupuesto", icon: Calculator },
   { name: "Hoja de Ruta", href: "/hoja-de-ruta", icon: Route },
+  { name: "Mi Perfil", href: "/perfil", icon: User },
 ];
 
 export function Sidebar() {
