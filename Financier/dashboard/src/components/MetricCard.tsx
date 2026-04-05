@@ -1,66 +1,71 @@
-import { cn } from "@/lib/utils";
+"use client";
+
+import { ReactNode } from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface MetricCardProps {
   title: string;
-  value: string | number;
+  value: string;
   subtitle?: string;
   trend?: {
     value: number;
     label: string;
   };
-  icon?: React.ReactNode;
-  className?: string;
+  icon: ReactNode;
   variant?: "default" | "success" | "warning" | "danger";
 }
 
-export function MetricCard({ 
-  title, 
-  value, 
-  subtitle, 
-  trend, 
-  icon, 
-  className,
-  variant = "default"
+export function MetricCard({
+  title,
+  value,
+  subtitle,
+  trend,
+  icon,
+  variant = "default",
 }: MetricCardProps) {
   const variantStyles = {
-    default: "border-slate-200 dark:border-slate-800",
-    success: "border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20",
-    warning: "border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20",
-    danger: "border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20",
+    default: "text-slate-600 dark:text-slate-400",
+    success: "text-emerald-600 dark:text-emerald-400",
+    warning: "text-amber-600 dark:text-amber-400",
+    danger: "text-red-600 dark:text-red-400",
   };
 
-  const iconStyles = {
-    default: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
-    success: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400",
-    warning: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400",
-    danger: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400",
+  const iconBgStyles = {
+    default: "bg-slate-100 dark:bg-slate-800",
+    success: "bg-emerald-100 dark:bg-emerald-900/30",
+    warning: "bg-amber-100 dark:bg-amber-900/30",
+    danger: "bg-red-100 dark:bg-red-900/30",
   };
 
   return (
-    <div className={cn("rounded-xl border p-6 shadow-sm transition-all hover:shadow-md", variantStyles[variant], className)}>
+    <div className="metric-card">
       <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
-          {subtitle && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
-          )}
-          {trend && (
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                "text-sm font-medium",
-                trend.value > 0 ? "text-emerald-600" : "text-red-600"
-              )}>
-                {trend.value > 0 ? "+" : ""}{trend.value}%
-              </span>
-              <span className="text-xs text-slate-500">{trend.label}</span>
-            </div>
-          )}
-        </div>
-        {icon && (
-          <div className={cn("p-3 rounded-xl", iconStyles[variant])}>
+        <div className={`p-2 rounded-lg ${iconBgStyles[variant]}`}>
+          <div className={variantStyles[variant]}>
             {icon}
           </div>
+        </div>
+        {trend && (
+          <div className={`flex items-center gap-1 text-xs font-medium ${
+            trend.value >= 0 ? "text-emerald-600" : "text-red-600"
+          }`}>
+            {trend.value >= 0 ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            <span>{Math.abs(trend.value)}%</span>
+          </div>
+        )}
+      </div>
+      <div className="mt-4">
+        <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
+        <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{value}</p>
+        {subtitle && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>
+        )}
+        {trend && (
+          <p className="text-xs text-slate-400 mt-1">{trend.label}</p>
         )}
       </div>
     </div>

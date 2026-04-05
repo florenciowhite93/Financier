@@ -1,221 +1,160 @@
-import { MetricCard } from "@/components/MetricCard";
-import { CreditCard, TrendingDown, Calendar, Target, DollarSign, CheckCircle } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { CreditCard, Plus, Trash2, TrendingDown, Zap } from "lucide-react";
+
+interface Deuda {
+  id: number;
+  nombre: string;
+  balance: number;
+  tasa: number;
+  pagoMinimo: number;
+}
 
 export default function DeudasPage() {
+  const [deudas, setDeudas] = useState<Deuda[]>([
+    { id: 1, nombre: "Tarjeta de Crédito A", balance: 15000, tasa: 24.99, pagoMinimo: 500 },
+    { id: 2, nombre: "Préstamo Personal", balance: 50000, tasa: 12.5, pagoMinimo: 1500 },
+  ]);
+  const [nuevaDeuda, setNuevaDeuda] = useState({ nombre: "", balance: "", tasa: "", pagoMinimo: "" });
+  const [pagoExtra, setPagoExtra] = useState(2000);
+
+  const agregarDeuda = () => {
+    if (nuevaDeuda.nombre && nuevaDeuda.balance) {
+      setDeudas([...deudas, {
+        id: Date.now(),
+        nombre: nuevaDeuda.nombre,
+        balance: parseFloat(nuevaDeuda.balance) || 0,
+        tasa: parseFloat(nuevaDeuda.tasa) || 0,
+        pagoMinimo: parseFloat(nuevaDeuda.pagoMinimo) || 0,
+      }]);
+      setNuevaDeuda({ nombre: "", balance: "", tasa: "", pagoMinimo: "" });
+    }
+  };
+
+  const eliminarDeuda = (id: number) => {
+    setDeudas(deudas.filter(d => d.id !== id));
+  };
+
+  const deudaTotal = deudas.reduce((sum, d) => sum + d.balance, 0);
+  const deudaOrdenada = [...deudas].sort((a, b) => b.tasa - a.tasa);
+  const deudaMayorTasa = deudaOrdenada[0];
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Eliminación de Deuda</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Estrategia de JPMorgan Private Bank
+          Estrategias estilo JPMorgan para eliminar deudas
         </p>
       </div>
 
-      {/* Debt Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Deuda Total"
-          value="$88,000"
-          trend={{ value: -8, label: "vs mes anterior" }}
-          icon={<CreditCard className="h-6 w-6" />}
-          variant="warning"
-        />
-        <MetricCard
-          title="Pago Mensual"
-          value="$2,850"
-          subtitle="Total obligaciones"
-          icon={<DollarSign className="h-6 w-6" />}
-          variant="default"
-        />
-        <MetricCard
-          title="Interés Total/Mes"
-          value="$480"
-          subtitle="Costo de financiamiento"
-          icon={<TrendingDown className="h-6 w-6" />}
-          variant="danger"
-        />
-        <MetricCard
-          title="Fecha Libre Deuda"
-          value="2031"
-          subtitle="27 meses restantes"
-          icon={<Calendar className="h-6 w-6" />}
-          variant="success"
-        />
-      </div>
-
-      {/* Debt Inventory */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Inventario Completo de Deudas
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Deuda</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Balance</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Tasa</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Pago Mín.</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Fecha Payoff</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Método</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "Hipoteca", balance: 65000, rate: 6.5, rateDisplay: "6.5%", min: 1200, payoff: "2033", method: "Avalancha" },
-                { name: "Préstamo Auto", balance: 15000, rate: 4.9, rateDisplay: "4.9%", min: 450, payoff: "2027", method: "Avalancha" },
-                { name: "Tarjeta Costco", balance: 3500, rate: 19.99, rateDisplay: "19.99%", min: 100, payoff: "2026", method: "Prioridad" },
-                { name: "Tarjeta Chase", balance: 1500, rate: 24.99, rateDisplay: "24.99%", min: 50, payoff: "2026", method: "Prioridad" },
-                { name: "Préstamo Personal", balance: 3000, rate: 8.5, rateDisplay: "8.5%", min: 150, payoff: "2027", method: "Avalancha" },
-              ].map((debt, i) => (
-                <tr key={i} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="py-3 px-4 font-medium text-slate-900 dark:text-white">{debt.name}</td>
-                  <td className="py-3 px-4 text-right font-medium">${debt.balance.toLocaleString()}</td>
-                  <td className={`py-3 px-4 text-right ${debt.rate > 15 ? "text-red-600" : "text-slate-600"}`}>{debt.rateDisplay}</td>
-                  <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">${debt.min}</td>
-                  <td className="py-3 px-4 text-right text-emerald-600 font-medium">{debt.payoff}</td>
-                  <td className="py-3 px-4 text-right">
-                    <span className={`badge ${debt.rate > 15 ? "badge-danger" : "badge-success"}`}>
-                      {debt.method}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="card p-4">
+          <p className="text-sm text-slate-500">Deuda Total</p>
+          <p className="text-2xl font-bold text-red-600">${deudaTotal.toLocaleString()}</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-sm text-slate-500">Mayor Tasa de Interés</p>
+          <p className="text-2xl font-bold text-amber-600">{deudaMayorTasa?.tasa || 0}%</p>
+          <p className="text-xs text-slate-500">{deudaMayorTasa?.nombre}</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-sm text-slate-500">Pago Extra Disponible</p>
+          <Input type="number" value={pagoExtra} onChange={(e) => setPagoExtra(parseFloat(e.target.value) || 0)} className="mt-1" />
         </div>
       </div>
 
-      {/* Strategy Comparison */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900 rounded-lg">
-              <TrendingDown className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Método Avalancha</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
-              <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">Recomendado para ti</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Pagar deudas de mayor tasa primero minimiza el interés total.</p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Interés total a pagar</span>
-                <span className="font-semibold text-emerald-600">$18,420</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Fecha libre de deuda</span>
-                <span className="font-semibold">Dic 2031</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Pago extra mensual</span>
-                <span className="font-semibold">$500</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Método Bola de Nieve</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              <p className="text-sm text-slate-600 dark:text-slate-400">Mejor para motivación psicológica. Rápidas victorias.</p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Interés total a pagar</span>
-                <span className="font-semibold">$19,850</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Fecha libre de deuda</span>
-                <span className="font-semibold">Mar 2032</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Diferencia vs Avalancha</span>
-                <span className="text-red-600">+$1,430</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Extra Payment Impact */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Impacto de Pagos Extra
-        </h2>
-        <div className="grid md:grid-cols-4 gap-4">
-          {[
-            { extra: "$0", interest: "$24,500", months: 96, savings: "$0" },
-            { extra: "$100", interest: "$21,200", months: 84, savings: "$3,300" },
-            { extra: "$250", interest: "$18,420", months: 72, savings: "$6,080" },
-            { extra: "$500", interest: "$15,100", months: 60, savings: "$9,400" },
-          ].map((item, i) => (
-            <div key={i} className={`p-4 rounded-xl border ${
-              i === 2 ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30" : ""
-            }`}>
-              <p className="text-sm text-slate-500">Pago extra mensual</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white">{item.extra}</p>
-              <div className="mt-3 space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Interés total</span>
-                  <span>{item.interest}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Meses</span>
-                  <span>{item.months}</span>
-                </div>
-                {item.savings !== "$0" && (
-                  <div className="flex justify-between text-emerald-600 font-medium">
-                    <span>Ahorro</span>
-                    <span>{item.savings}</span>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Tus Deudas
+          </h2>
+          <div className="space-y-3">
+            {deudaOrdenada.map((deuda) => (
+              <div key={deuda.id} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">{deuda.nombre}</p>
+                    <p className="text-sm text-slate-500">{deuda.tasa}% TAE</p>
                   </div>
-                )}
+                  <div className="text-right">
+                    <p className="font-bold text-slate-900 dark:text-white">${deuda.balance.toLocaleString()}</p>
+                    <p className="text-xs text-slate-500">Mín: ${deuda.pagoMinimo}/mes</p>
+                  </div>
+                </div>
+                <button onClick={() => eliminarDeuda(deuda.id)} className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1">
+                  <Trash2 className="h-4 w-4" /> Eliminar
+                </button>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            ))}
+          </div>
 
-      {/* Milestones */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Celebración de Hitos
-        </h2>
-        <div className="space-y-4">
-          {[
-            { milestone: "Tarjeta Chase $1,500", status: "completed", date: "Mar 2025" },
-            { milestone: "Tarjeta Costco $3,500", status: "current", date: "Jun 2026" },
-            { milestone: "Préstamo Personal $3,000", status: "pending", date: "Oct 2026" },
-            { milestone: "Préstamo Auto $15,000", status: "pending", date: "Feb 2027" },
-            { milestone: "Hipoteca $65,000", status: "pending", date: "Dic 2031" },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              {item.status === "completed" ? (
-                <CheckCircle className="h-6 w-6 text-emerald-500" />
-              ) : item.status === "current" ? (
-                <div className="w-6 h-6 rounded-full border-2 border-amber-500 bg-amber-100 dark:bg-amber-900/30" />
-              ) : (
-                <div className="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-slate-600" />
-              )}
-              <div className="flex-1">
-                <p className={`font-medium ${item.status === "completed" ? "text-slate-500 line-through" : "text-slate-900 dark:text-white"}`}>
-                  {item.milestone}
-                </p>
-              </div>
-              <span className="text-sm text-slate-500">{item.date}</span>
-              {item.status === "current" && (
-                <span className="badge badge-warning">En progreso</span>
-              )}
+          <div className="mt-4 p-4 rounded-lg border border-dashed">
+            <h3 className="font-medium text-slate-900 dark:text-white mb-3">Agregar Nueva Deuda</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <Input placeholder="Nombre" value={nuevaDeuda.nombre} onChange={(e) => setNuevaDeuda({...nuevaDeuda, nombre: e.target.value})} />
+              <Input type="number" placeholder="Balance" value={nuevaDeuda.balance} onChange={(e) => setNuevaDeuda({...nuevaDeuda, balance: e.target.value})} />
+              <Input type="number" placeholder="Tasa %" value={nuevaDeuda.tasa} onChange={(e) => setNuevaDeuda({...nuevaDeuda, tasa: e.target.value})} />
+              <Input type="number" placeholder="Pago mínimo" value={nuevaDeuda.pagoMinimo} onChange={(e) => setNuevaDeuda({...nuevaDeuda, pagoMinimo: e.target.value})} />
             </div>
-          ))}
+            <Button onClick={agregarDeuda} className="w-full mt-3" variant="outline">
+              <Plus className="h-4 w-4 mr-1" /> Agregar Deuda
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="card p-6">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-500" />
+              Método Avalancha (Recomendado)
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              Paga las deudas de mayor a menor tasa de interés. Matemáticamente es el más eficiente.
+            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between p-2 rounded bg-emerald-50 dark:bg-emerald-950/30">
+                <span className="text-sm">1. Ordena por tasa más alta</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-emerald-50 dark:bg-emerald-950/30">
+                <span className="text-sm">2. Paga mínimo en todas</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-emerald-50 dark:bg-emerald-950/30">
+                <span className="text-sm">3. Destina extra a mayor tasa</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-emerald-50 dark:bg-emerald-950/30">
+                <span className="text-sm">4. Repite hasta eliminar</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-6">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-blue-500" />
+              Método Bola de Nieve
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              Paga las deudas de menor a mayor balance. Psicológicamente motiva más victorias rápidas.
+            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between p-2 rounded bg-blue-50 dark:bg-blue-950/30">
+                <span className="text-sm">1. Ordena por balance menor</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-blue-50 dark:bg-blue-950/30">
+                <span className="text-sm">2. Paga mínimo en todas</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-blue-50 dark:bg-blue-950/30">
+                <span className="text-sm">3. Destina extra a menor deuda</span>
+              </div>
+              <div className="flex justify-between p-2 rounded bg-blue-50 dark:bg-blue-950/30">
+                <span className="text-sm">4. Celebra cada victoria</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

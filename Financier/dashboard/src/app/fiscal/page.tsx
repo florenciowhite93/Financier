@@ -1,177 +1,112 @@
-import { MetricCard } from "@/components/MetricCard";
-import { DollarSign, TrendingDown, Building2, Gift, PiggyBank, FileText } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Calculator, DollarSign, Receipt, Percent } from "lucide-react";
 
 export default function FiscalPage() {
+  const [ingresoAnual, setIngresoAnual] = useState("");
+  const [brackets, setBrackets] = useState<{min: number; max: number; rate: number}[]>([
+    { min: 0, max: 11600, rate: 10 },
+    { min: 11600, max: 47150, rate: 12 },
+    { min: 47150, max: 100525, rate: 22 },
+    { min: 100525, max: 191950, rate: 24 },
+    { min: 191950, max: 243725, rate: 32 },
+    { min: 243725, max: 609350, rate: 35 },
+    { min: 609350, max: Infinity, rate: 37 },
+  ]);
+
+  const calcularImpuesto = () => {
+    const ingreso = parseFloat(ingresoAnual) || 0;
+    let impuestoTotal = 0;
+    let ingresoRestante = ingreso;
+
+    return brackets.map((bracket, i) => {
+      if (ingresoRestante <= 0) return { ...bracket, tax: 0, effectiveRate: 0 };
+      const ingresoEnBracket = Math.min(ingresoRestante, bracket.max - bracket.min);
+      const tax = ingresoEnBracket * (bracket.rate / 100);
+      impuestoTotal += tax;
+      ingresoRestante -= ingresoEnBracket;
+      return { ...bracket, tax, effectiveRate: ingreso > 0 ? (impuestoTotal / ingreso) * 100 : 0 };
+    });
+  };
+
+  const resultados = parseFloat(ingresoAnual) > 0 ? calcularImpuesto() : [];
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Optimización Fiscal</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Estrategias de Deloitte Tax Optimization
+          Estrategias fiscales estilo Deloitte
         </p>
       </div>
 
-      {/* Tax Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Ingreso Gravable"
-          value="$185,000"
-          subtitle="2024"
-          icon={<DollarSign className="h-6 w-6" />}
-          variant="default"
-        />
-        <MetricCard
-          title="Impuesto Estimado"
-          value="$38,500"
-          subtitle="21% efectiva"
-          icon={<Building2 className="h-6 w-6" />}
-          variant="warning"
-        />
-        <MetricCard
-          title="Deducciones Totales"
-          value="$32,400"
-          subtitle="Standard + itemized"
-          icon={<TrendingDown className="h-6 w-6" />}
-          variant="success"
-        />
-        <MetricCard
-          title="Ahorro Fiscal YTD"
-          value="$8,200"
-          subtitle="De estrategias"
-          icon={<PiggyBank className="h-6 w-6" />}
-          variant="success"
-        />
-      </div>
-
-      {/* Tax Brackets */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Brackets Federales 2024 (Soltero)
-        </h2>
-        <div className="space-y-3">
-          {[
-            { bracket: "10%", range: "$0 - $11,600", tax: "$1,160" },
-            { bracket: "12%", range: "$11,601 - $47,150", tax: "$4,266" },
-            { bracket: "22%", range: "$47,151 - $100,525", tax: "$11,743" },
-            { bracket: "24%", range: "$100,526 - $191,950", tax: "$21,942" },
-            { bracket: "32%", range: "$191,951+", tax: "N/A" },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              <span className="w-16 font-semibold text-slate-900 dark:text-white">{item.bracket}</span>
-              <span className="flex-1 text-slate-600 dark:text-slate-400">{item.range}</span>
-              <span className="font-medium text-emerald-600">{item.tax}</span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
-          <p className="text-sm text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">Tu posición:</span> Estás en el bracket 24%. Considera bunching de deducciones o Roth conversions para minimizar el impacto.
-          </p>
-        </div>
-      </div>
-
-      {/* Tax Strategies */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900 rounded-lg">
-              <PiggyBank className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Contribuciones 2024</h3>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            Calculadora de Impuestos 2024
+          </h2>
           <div className="space-y-4">
-            {[
-              { type: "401(k)", limit: "$23,000", contributed: "$23,000", remaining: "$0", status: "maxed" },
-              { type: "IRA Roth", limit: "$7,000", contributed: "$7,000", remaining: "$0", status: "maxed" },
-              { type: "HSA", limit: "$4,150", contributed: "$4,150", remaining: "$0", status: "maxed" },
-              { type: "Backdoor Roth", limit: "$7,000", contributed: "$7,000", remaining: "$0", status: "done" },
-            ].map((item, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="font-medium text-slate-900 dark:text-white">{item.type}</span>
-                  <span className="text-emerald-600">{item.contributed} / {item.limit}</span>
-                </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                  <div className="bg-emerald-500 h-2 rounded-full" style={{ width: "100%" }} />
-                </div>
+            <Input
+              label="Ingreso Anual Gravable"
+              type="number"
+              placeholder="150000"
+              value={ingresoAnual}
+              onChange={(e) => setIngresoAnual(e.target.value)}
+            />
+          </div>
+
+          {resultados.length > 0 && (
+            <div className="mt-6 space-y-2">
+              <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">Impuesto Total Estimado</p>
+                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                  ${resultados.reduce((sum, b) => sum + b.tax, 0).toLocaleString()}
+                </p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                  Tasa efectiva: {resultados[resultados.length - 1].effectiveRate.toFixed(2)}%
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="card p-6">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <Percent className="h-5 w-5" />
+            Brackets Federales 2024
+          </h2>
+          <div className="space-y-2">
+            {brackets.map((bracket, i) => (
+              <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm">
+                <span className="text-slate-600 dark:text-slate-400">
+                  ${bracket.min.toLocaleString()} - ${bracket.max === Infinity ? "∞" : bracket.max.toLocaleString()}
+                </span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">{bracket.rate}%</span>
               </div>
             ))}
           </div>
         </div>
-
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Donaciones Caritativas</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Donor-Advised Fund</span>
-              <span className="badge badge-success">Activo</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Donaciones 2024</span>
-              <span className="font-semibold text-emerald-600">$12,000</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Ahorro fiscal estimado</span>
-              <span className="font-semibold">$4,200</span>
-            </div>
-            <div className="flex justify-between items-center py-3">
-              <span className="text-slate-500">Stock donado</span>
-              <span className="font-medium">$8,000 (EVLY)</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Tax-Loss Harvesting */}
       <div className="card p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Tax-Loss Harvesting</h3>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-            <p className="text-sm text-slate-500">Pérdidas Realizadas YTD</p>
-            <p className="text-2xl font-bold text-emerald-600">$4,200</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-            <p className="text-sm text-slate-500">Capital Gains Offset</p>
-            <p className="text-2xl font-bold">$4,200</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-            <p className="text-sm text-slate-500">Ahorro Fiscal Estimado</p>
-            <p className="text-2xl font-bold text-emerald-600">$1,260</p>
-          </div>
-        </div>
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-          <p className="text-sm text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">Tip:</span>Tienes $1,800 en pérdidas no realizadas que podrían usarse para offsetear ganancias adicionales si las hay.
-          </p>
-        </div>
-      </div>
-
-      {/* Year-Round Calendar */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Calendario Fiscal 2026
-        </h2>
-        <div className="grid md:grid-cols-4 gap-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Estrategias de Optimización</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { month: "Ene-Abr", action: "Contribuciones IRA", deadline: "15 Abr" },
-            { month: "Jun", action: "Revisar mid-year tax", deadline: "30 Jun" },
-            { month: "Sep", action: "Backdoor Roth", deadline: "30 Sep" },
-            { month: "Dic", action: "Tax-loss harvest, bunching", deadline: "31 Dic" },
-          ].map((item, i) => (
-            <div key={i} className="p-4 rounded-xl border">
-              <p className="font-semibold text-slate-900 dark:text-white">{item.month}</p>
-              <p className="text-sm text-slate-500 mt-1">{item.action}</p>
-              <p className="text-sm text-emerald-600 mt-2">Deadline: {item.deadline}</p>
+            { titulo: "Tax-Loss Harvesting", desc: "Vende posiciones perdedoras para generar pérdidas fiscales", icono: DollarSign },
+            { titulo: "Backdoor Roth IRA", desc: "Contribuye a Traditional IRA y convierte a Roth", icono: Receipt },
+            { titulo: "Bunching Deducciones", desc: "Concentra gastos deducibles en años alternos", icono: Percent },
+            { titulo: "HSA como Stealth IRA", desc: "Guarda receipts, invierte crecimiento, reembolsa después", icono: Calculator },
+            { titulo: "Donor-Advised Fund", desc: "Dona activos apreciados para deducción inmediata", icono: DollarSign },
+            { titulo: "Contribución 401(k)", desc: "Maximiza contribuciones antes de impuestos", icono: Receipt },
+          ].map((strategy, i) => (
+            <div key={i} className="p-4 rounded-lg border bg-white dark:bg-slate-900 hover:border-emerald-300 transition-colors">
+              <strategy.icono className="h-5 w-5 text-emerald-600 mb-2" />
+              <h3 className="font-medium text-slate-900 dark:text-white">{strategy.titulo}</h3>
+              <p className="text-sm text-slate-500 mt-1">{strategy.desc}</p>
             </div>
           ))}
         </div>

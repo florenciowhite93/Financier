@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { Sidebar } from "@/components/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Financier - Tu Asistente Financiero",
-  description: "Dashboard financiero integral basado en las mejores prácticas de Goldman Sachs, Vanguard, Morgan Stanley y más.",
+  description: "Dashboard financiero integral basado en las mejores prácticas.",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -31,11 +31,12 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased min-h-screen">
-        <AuthProvider>
-          <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+          <Sidebar />
+          <main className="flex-1 lg:ml-64">
             {children}
-          </div>
-        </AuthProvider>
+          </main>
+        </div>
       </body>
     </html>
   );

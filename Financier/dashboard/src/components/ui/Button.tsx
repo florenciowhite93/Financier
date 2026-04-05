@@ -1,32 +1,33 @@
-import { cn } from "@/lib/utils";
-import { ButtonHTMLAttributes, forwardRef } from "react";
+"use client";
+
+import { forwardRef, ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => {
+  ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
+    const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    
+    const variants = {
+      primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+      ghost: "hover:bg-accent hover:text-accent-foreground",
+    };
+    
+    const sizes = {
+      sm: "h-8 px-3 text-xs",
+      md: "h-10 px-4 text-sm",
+      lg: "h-12 px-6 text-base",
+    };
+
     return (
       <button
         ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none",
-          {
-            "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500": variant === "primary",
-            "bg-slate-600 text-white hover:bg-slate-700 focus:ring-slate-500": variant === "secondary",
-            "border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 focus:ring-slate-500": variant === "outline",
-            "hover:bg-slate-100 text-slate-700 focus:ring-slate-500": variant === "ghost",
-            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500": variant === "danger",
-          },
-          {
-            "px-3 py-1.5 text-sm": size === "sm",
-            "px-4 py-2 text-base": size === "md",
-            "px-6 py-3 text-lg": size === "lg",
-          },
-          className
-        )}
+        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
         {...props}
       />
     );

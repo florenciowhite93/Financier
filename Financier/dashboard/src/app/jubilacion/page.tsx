@@ -1,207 +1,158 @@
-import { MetricCard } from "@/components/MetricCard";
-import { RetirementChart } from "@/components/RetirementChart";
-import { TrendingUp, Target, Calendar, PiggyBank, DollarSign, Clock } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { TrendingUp, Calculator, DollarSign } from "lucide-react";
 
 export default function JubilacionPage() {
+  const [formData, setFormData] = useState({
+    edadActual: "",
+    edadJubilacion: "67",
+    gastosMensuales: "",
+    ingresosMensuales: "",
+  });
+
+  const [resultado, setResultado] = useState<{
+    numeroJubilacion: number;
+    ahorroMensual: number;
+    objetivoSocial: number;
+  } | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const calcular = () => {
+    const edadActual = parseInt(formData.edadActual) || 30;
+    const edadJubilacion = parseInt(formData.edadJubilacion) || 67;
+    const gastosMensuales = parseFloat(formData.gastosMensuales) || 50000;
+    const ingresosMensuales = parseFloat(formData.ingresosMensuales) || 80000;
+
+    const reemplazo = gastosMensuales / ingresosMensuales;
+    const tasaReemplazo = Math.min(0.9, Math.max(0.65, reemplazo));
+    
+    const gastosJubilacion = gastosMensuales * tasaReemplazo;
+    const numeroJubilacion = gastosJubilacion * 12 * 25;
+    
+    const anios = edadJubilacion - edadActual;
+    const tasaAnual = 0.07;
+    const tasaMensual = tasaAnual / 12;
+    const meses = anios * 12;
+    
+    const ahorroMensual = numeroJubilacion * tasaMensual / (Math.pow(1 + tasaMensual, meses) - 1);
+    const objetivoSocial = 15000 * 12;
+
+    setResultado({ numeroJubilacion, ahorroMensual, objetivoSocial });
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Planificación de Jubilación</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Análisis basado en metodologías de Vanguard
+          Calcula tu número de jubilación con metodología Vanguard
         </p>
       </div>
 
-      {/* Key Retirement Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Número de Jubilación"
-          value="$2,200,000"
-          subtitle="Basado en gastos actuales"
-          icon={<Target className="h-6 w-6" />}
-          variant="success"
-        />
-        <MetricCard
-          title="Patrimonio Actual"
-          value="$1,250,000"
-          subtitle="57% del objetivo"
-          icon={<TrendingUp className="h-6 w-6" />}
-          variant="success"
-        />
-        <MetricCard
-          title="Ahorro Mensual"
-          value="$3,500"
-          subtitle="Hacia jubilación"
-          icon={<PiggyBank className="h-6 w-6" />}
-          variant="success"
-        />
-        <MetricCard
-          title="Edad Objetivo"
-          value="67 años"
-          subtitle="Retiro planeado"
-          icon={<Calendar className="h-6 w-6" />}
-          variant="default"
-        />
-      </div>
-
-      {/* Retirement Projection Chart */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            Proyección Patrimonial
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="card p-6">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            Datos para Jubilación
           </h2>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-1 bg-emerald-500 rounded" />
-              <span className="text-slate-500">Proyección</span>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                name="edadActual"
+                label="Edad Actual"
+                type="number"
+                placeholder="35"
+                value={formData.edadActual}
+                onChange={handleChange}
+              />
+              <Input
+                name="edadJubilacion"
+                label="Edad de Jubilación"
+                type="number"
+                placeholder="67"
+                value={formData.edadJubilacion}
+                onChange={handleChange}
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-1 border-t-2 border-dashed border-emerald-500" />
-              <span className="text-slate-500">Meta</span>
-            </div>
+            <Input
+              name="gastosMensuales"
+              label="Gastos Mensuales Esperados"
+              type="number"
+              placeholder="50000"
+              value={formData.gastosMensuales}
+              onChange={handleChange}
+            />
+            <Input
+              name="ingresosMensuales"
+              label="Ingresos Mensuales Actuales"
+              type="number"
+              placeholder="80000"
+              value={formData.ingresosMensuales}
+              onChange={handleChange}
+            />
+            <Button onClick={calcular} className="w-full">
+              Calcular Número de Jubilación
+            </Button>
           </div>
         </div>
-        <RetirementChart />
-        <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl">
-          <p className="text-center text-slate-700 dark:text-slate-300">
-            <span className="font-semibold text-emerald-600">En camino.</span> Con el ritmo actual de ahorro, alcanzarás tu meta de jubilación 3 años antes de lo planeado.
-          </p>
-        </div>
-      </div>
 
-      {/* Account Strategy */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Estrategia de Cuentas
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { name: "401(k)", balance: "$485,000", contribution: "$23,000/año", match: "100% del employer", limit: "$23,000" },
-            { name: "IRA Roth", balance: "$85,000", contribution: "$7,000/año", match: "N/A", limit: "$7,000" },
-            { name: "HSA", balance: "$28,000", contribution: "$4,150/año", match: "Triple tax adv.", limit: "$4,150" },
-            { name: "Taxable", balance: "$280,000", contribution: "Variable", match: "N/A", limit: "Ilimitado" },
-          ].map((account, i) => (
-            <div key={i} className="p-4 rounded-xl border bg-slate-50 dark:bg-slate-800/50">
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-3">{account.name}</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Balance</span>
-                  <span className="font-medium text-emerald-600">{account.balance}</span>
+        {resultado && (
+          <div className="space-y-6">
+            <div className="card p-6 bg-gradient-to-br from-emerald-500 to-emerald-700 text-white">
+              <h3 className="text-lg font-medium opacity-90 mb-2">Tu Número de Jubilación</h3>
+              <p className="text-4xl font-bold">${resultado.numeroJubilacion.toLocaleString()}</p>
+              <p className="text-sm opacity-80 mt-2">Patrimonio necesario para jubilarte</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="card p-4">
+                <div className="flex items-center gap-2 text-slate-500 mb-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="text-sm">Ahorro Mensual Necesario</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Contribución</span>
-                  <span>{account.contribution}</span>
+                <p className="text-xl font-bold text-emerald-600">
+                  ${Math.round(resultado.ahorroMensual).toLocaleString()}
+                </p>
+              </div>
+              <div className="card p-4">
+                <div className="flex items-center gap-2 text-slate-500 mb-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-sm">Meta Social Security</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Beneficio</span>
-                  <span className="text-emerald-600">{account.match}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Límite 2024</span>
-                  <span>{account.limit}</span>
-                </div>
+                <p className="text-xl font-bold text-slate-600 dark:text-slate-300">
+                  ${Math.round(resultado.objetivoSocial).toLocaleString()}
+                </p>
+                <p className="text-xs text-slate-500">anuales estimados</p>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Social Security & Withdrawal */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Social Security</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Edad de reclamación</span>
-              <span className="font-semibold">70 años</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Beneficio mensual</span>
-              <span className="font-semibold text-emerald-600">$3,200/mes</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Beneficio anual</span>
-              <span className="font-semibold text-emerald-600">$38,400/año</span>
-            </div>
-            <div className="flex justify-between items-center py-3">
-              <span className="text-slate-500">Lifetime value (hasta 90)</span>
-              <span className="font-semibold">$768,000</span>
-            </div>
-          </div>
-          <p className="mt-4 text-sm text-slate-500">
-            Esperar hasta los 70 años maximiza tu beneficio de Social Security (+24% sobre FRA).
-          </p>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Estrategia de Retiro</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
-              <h4 className="font-medium text-emerald-700 dark:text-emerald-400 mb-2">Safe Withdrawal Rate</h4>
-              <p className="text-2xl font-bold text-emerald-600">4%</p>
-              <p className="text-sm text-slate-500 mt-1">$88,000/año de $2.2M</p>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Inflación ajustada</span>
-              <span className="badge badge-success">Activo</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500">Bucket strategy</span>
-              <span className="badge badge-success">Implementado</span>
-            </div>
-            <div className="flex justify-between items-center py-3">
-              <span className="text-slate-500">Proyección 30 años</span>
-              <span className="text-emerald-600 font-medium">Positivo</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Milestones */}
       <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
-          Hitos de Ahorro por Edad
-        </h2>
-        <div className="grid md:grid-cols-5 gap-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Estrategia de Cuentas</h2>
+        <div className="space-y-3">
           {[
-            { age: 30, target: "$50,000", status: "achieved" },
-            { age: 35, target: "$150,000", status: "achieved" },
-            { age: 40, target: "$320,000", status: "achieved" },
-            { age: 45, target: "$520,000", status: "current" },
-            { age: 50, target: "$780,000", status: "pending" },
-            { age: 55, target: "$1,100,000", status: "pending" },
-            { age: 60, target: "$1,500,000", status: "pending" },
-            { age: 65, target: "$2,000,000", status: "pending" },
-          ].map((milestone, i) => (
-            <div key={i} className={`p-4 rounded-xl text-center ${
-              milestone.status === "achieved" ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800" :
-              milestone.status === "current" ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800" :
-              "bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
-            }`}>
-              <p className="text-sm text-slate-500 mb-1">Edad {milestone.age}</p>
-              <p className={`font-semibold ${
-                milestone.status === "achieved" ? "text-emerald-600" :
-                milestone.status === "current" ? "text-amber-600" :
-                "text-slate-400"
-              }`}>
-                {milestone.target}
-              </p>
-              {milestone.status === "achieved" && (
-                <p className="text-xs text-emerald-600 mt-1">✓ Logrado</p>
-              )}
-              {milestone.status === "current" && (
-                <p className="text-xs text-amber-600 mt-1">● Actual</p>
-              )}
+            { orden: 1, cuenta: "401(k) hasta match del empleador", desc: "Free money - maximiza primero" },
+            { orden: 2, cuenta: "HSA (si tienes seguro HDHP)", desc: "Triple tax advantage" },
+            { orden: 3, cuenta: "401(k) máximo personal", desc: "$23,000 en 2024" },
+            { orden: 4, cuenta: "IRA Roth o Traditional", desc: "Según tu bracket fiscal" },
+            { orden: 5, cuenta: "Cuenta imponible", desc: "Después de maximizar contribuciones" },
+          ].map((item) => (
+            <div key={item.orden} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <span className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
+                {item.orden}
+              </span>
+              <div>
+                <p className="font-medium text-slate-900 dark:text-white">{item.cuenta}</p>
+                <p className="text-sm text-slate-500">{item.desc}</p>
+              </div>
             </div>
           ))}
         </div>
