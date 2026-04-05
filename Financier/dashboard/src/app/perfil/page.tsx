@@ -1,22 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { User, Mail, Phone, Calendar, DollarSign, Home, TrendingUp } from "lucide-react";
+import { User, DollarSign, TrendingUp } from "lucide-react";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user, signOut } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const [formData, setFormData] = useState({
     nombre: "",
     edad: "",
-    email: user?.email || "",
+    email: "",
     telefono: "",
     ingresos: "",
     patrimonio: "",
@@ -37,22 +33,12 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/auth/login");
-  };
-
   return (
     <div className="p-6 lg:p-8">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Mi Perfil Financiero</h1>
-            <p className="text-slate-500 mt-1">Actualiza tu información personal y objetivos</p>
-          </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            Cerrar Sesión
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Mi Perfil Financiero</h1>
+          <p className="text-slate-500 mt-1">Actualiza tu información personal y objetivos</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
