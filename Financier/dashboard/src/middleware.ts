@@ -67,8 +67,10 @@
 // END OF AUTHENTICATION MIDDLEWARE
 // ============================================================================
 
-export default function middleware() {
-  return new Response("Auth disabled - coming soon", { status: 200 });
+import { NextResponse } from "next/server";
+
+export function middleware() {
+  return NextResponse.next();
 }
 
 export const config = {
